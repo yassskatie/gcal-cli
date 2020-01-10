@@ -139,9 +139,9 @@ const list = async (naturalInfo, options) => {
       start = moment(event.start.date).format(conf.LIST_FORMAT_DATE);
     }
     if (showId) {
-      console.log(` ${start} - ${chalk.bold(event.summary)} (${event.id})`);
+      console.log(`- [ ] ${start} - ${chalk.bold(event.summary)} (${event.id})`);
     } else {
-      console.log(` ${start} - ${chalk.bold(event.summary)}`);
+      console.log(`- [ ] ${start} - ${chalk.bold(event.summary)}`);
     }
   });
 };
