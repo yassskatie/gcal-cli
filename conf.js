@@ -15,9 +15,9 @@ module.exports = {
   LIST_ORDER: 'startTime',
 
   // about format: momentjs.com/docs/#/displaying/format
-  LIST_FORMAT_DATETIME: 'YYYY-MM-DD HH:mm',
+  LIST_FORMAT_DATETIME: 'HH:mm',
 
-  LIST_FORMAT_DATE: 'YYYY-MM-DD [(All)]',
+  LIST_FORMAT_DATE: '[(All)]',
 
   // available properties developers.google.com/google-apps/calendar/v3/reference/events
   BULK_RESULT: ['id', 'summary' , 'htmlLink'],
