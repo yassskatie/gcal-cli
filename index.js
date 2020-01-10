@@ -132,7 +132,7 @@ const list = async (naturalInfo, options) => {
   }
   console.log(`Upcoming events (${params.timeMin} ~ ${params.timeMax || ''})`);
   events.forEach(event => {
-    console.log(`${event}`)
+    console.log(util.inspect(event, false, null, true))
     let start;
     if (event.start.dateTime) {
       start = moment(event.start.dateTime).format(conf.LIST_FORMAT_DATETIME);
