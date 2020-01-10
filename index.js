@@ -130,21 +130,58 @@ const list = async (naturalInfo, options) => {
     console.log(`No upcoming events found (${params.timeMin} ~ ${params.timeMax || ''})`);
     return;
   }
-  console.log(`Upcoming events (${params.timeMin} ~ ${params.timeMax || ''})`);
+  // console.log(`Upcoming events (${params.timeMin} ~ ${params.timeMax || ''})`);
+
+  let totalDuration = moment.duration(0);
   events.forEach(event => {
-    console.log(util.inspect(event, false, null, true))
-    let start;
-    if (event.start.dateTime) {
-      start = moment(event.start.dateTime).format(conf.LIST_FORMAT_DATETIME);
+    if (event.attendees) {
+      const me = event.attendees.find(attendee => attendee.self)
+      if (me.responseStatus == "declined") { return }
     } else {
-      start = moment(event.start.date).format(conf.LIST_FORMAT_DATE);
+      return
     }
-    if (showId) {
-      console.log(`- [ ] ${start} - ${chalk.bold(event.summary)} (${event.id})`);
+
+    let start;
+    let formattedStart;
+    if (event.start.dateTime) {
+      start = moment(event.start.dateTime);
+      formattedStart = start.format(conf.LIST_FORMAT_DATETIME);
     } else {
-      console.log(`- [ ] ${start} - ${chalk.bold(event.summary)}`);
+      start = moment(event.start.date);
+      formattedStart = start.format(conf.LIST_FORMAT_DATE);
+    }
+
+    let end;
+    if (event.end.dateTime) {
+      end = moment(event.end.dateTime);
+    } else {
+      end = moment(event.end.date);
+    }
+
+    const duration = moment.duration(end.diff(start));
+    totalDuration.add(duration);
+
+    if (showId) {
+      console.log(`- [ ] **${formattedStart}** - ${chalk.bold(event.summary)} (${event.id})`);
+    } else {
+      console.log(`- [ ] **${formattedStart}** - ${chalk.bold(event.summary)}`);
+    }
+    console.log(`  - ${duration.humanize()}`)
+    if (event.conferenceData) {
+      const video = event.conferenceData.entryPoints.find(entry => entry.entryPointType === "video")
+      console.log(`  - [${event.conferenceData.conferenceSolution.name}](${video.uri})`)
+    } else if (event.location) {
+      console.log(`  -  ${event.location}`)
+    }
+
+    if (event.attachments) {
+      event.attachments.forEach(attachment => {
+        console.log(`  - [${attachment.title}](${attachment.fileUrl})`)
+      })
     }
   });
+
+  console.log(`\n\n<kbd> ⚡️ **${totalDuration.hours()} hours and ${totalDuration.minutes()} minutes**  ✨ </kbd>`);
 };
 
 /**
@@ -186,7 +223,7 @@ const insert = async (naturalInfo, options) => {
         date: moment(date).format('YYYY-MM-DD')
       };
       event.end = {
-        date: duration ? 
+        date: duration ?
           moment(date).add(duration.slice(0, -1), duration.slice(-1)).format('YYYY-MM-DD') :
           moment(date).add(1, 'd').format('YYYY-MM-DD')
       };
@@ -196,7 +233,7 @@ const insert = async (naturalInfo, options) => {
         dateTime: moment(dateTime).format()
       };
       event.end = {
-        dateTime: duration ? 
+        dateTime: duration ?
           moment(dateTime).add(duration.slice(0, -1), duration.slice(-1)).format() :
           moment(dateTime).add(conf.EVENT_DURATION, 'm').format()
       };
